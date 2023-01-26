@@ -6,13 +6,13 @@ Dev_tool::Dev_tool(QWidget *parent)
     , ui(new Ui::Dev_tool)
 {
     ui->setupUi(this);
-    ui->bit8_ret->setReadOnly(true);
-    ui->bit16_ret->setReadOnly(true);
-    ui->bit32_ret->setReadOnly(true);
-    ui->bit64_ret->setReadOnly(true);
-    connect(ui->num_input, SIGNAL(returnPressed()), this, SLOT(on_calc_num_btn_clicked()));
 
-    ui->status_label_tab1->setText("初始化完成，请输入溢出数");
+    //固定窗口
+    this->setWindowFlag(Qt::Dialog);
+    this->setFixedSize(this->width(), this->height());
+
+    tab1_init();
+    tab2_init();
 }
 
 Dev_tool::~Dev_tool()
@@ -90,5 +90,86 @@ void Dev_tool::on_calc_num_btn_clicked()
     {
         ui->bit64_ret->setText(QString::number((UINT64_MAX + (1 + num))));
     }
+}
+
+void Dev_tool::tab1_init()
+{
+    connect(ui->num_input, SIGNAL(returnPressed()), this, SLOT(on_calc_num_btn_clicked()));
+    ui->status_label_tab1->setText("初始化完成，请输入溢出数");
+    return;
+}
+
+void Dev_tool::tab2_init()
+{
+    QFile type_file("./Type_list.txt");
+    if (!type_file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        ui->omap_ret->setText("打开类型文件出错！");
+        ui->omap_ret->append("当前路径为：");
+        ui->omap_ret->append(QDir::currentPath());
+        ui->omap_btn->setEnabled(false);
+        ui->type_list->setEnabled(false);
+        return;
+    }
+    QTextStream typefile_list(&type_file);
+    while (!typefile_list.atEnd())
+    {
+        QString type = typefile_list.readLine();
+        ui->type_list->addItem(type);
+    }
+    type_file.close();
+    ui->omap_ret->setText("初始化完成！");
+    return;
+}
+
+
+void Dev_tool::on_omap_btn_clicked()
+{
+    ui->omap_ret->clear();
+    if (ui->omap_label->text().isEmpty())
+    {
+        ui->omap_ret->setText("标签名为空！");
+        return;
+    }
+    if (ui->bit_count->text().isEmpty())
+    {
+        ui->omap_ret->setText("显示位数为空！");
+        return;
+    }
+    else if (0 == ui->bit_count->text().toInt())
+    {
+        ui->omap_ret->setText("显示位数输入错误！");
+        return;
+    }
+    if (ui->omap_page->text().isEmpty())
+    {
+        ui->omap_ret->setText("OMAP页数为空!");
+        return;
+    }
+    else if (0 == ui->omap_page->text().toInt())
+    {
+        ui->omap_ret->setText("OMAP页数输入错误!");
+        return;
+    }
+    if (ui->omap_line->text().isEmpty())
+    {
+        ui->omap_ret->setText("OMAP行号为空!");
+        return;
+    }
+    else if (0 == ui->omap_line->text().toInt())
+    {
+        ui->omap_ret->setText("OMAP行号输入错误!");
+        return;
+    }
+    ui->omap_ret->setText("<Data>");
+    ui->omap_ret->append("    <Label>" + ui->omap_label->text() + "</Label>");
+    ui->omap_ret->append("    <TYPE>" + ui->type_list->currentText() + "</TYPE>");
+    ui->omap_ret->append("    <Bit_count>" + ui->bit_count->text() + "</Bit_count>");
+    ui->omap_ret->append("    <OMAP_display>");
+    ui->omap_ret->append("        <PAGE>" + ui->omap_page->text() + "</PAGE>");
+    ui->omap_ret->append("        <LINE>" + ui->omap_line->text() + "</LINE>");
+    ui->omap_ret->append("        <COL>" + ui->omap_col->currentText() + "</COL>");
+    ui->omap_ret->append("    </OMAP_display>");
+    ui->omap_ret->append("</Data>");
 }
 
