@@ -13,6 +13,7 @@ Dev_tool::Dev_tool(QWidget *parent)
 
     tab1_init();
     tab2_init();
+    tab3_init();
 }
 
 Dev_tool::~Dev_tool()
@@ -90,6 +91,7 @@ void Dev_tool::on_calc_num_btn_clicked()
     {
         ui->bit64_ret->setText(QString::number((UINT64_MAX + (1 + num))));
     }
+    return;
 }
 
 void Dev_tool::tab1_init()
@@ -119,6 +121,15 @@ void Dev_tool::tab2_init()
     }
     type_file.close();
     ui->omap_ret->setText("初始化完成！");
+    return;
+}
+
+void Dev_tool::tab3_init()
+{
+    ui->gm_src->setPlaceholderText("输入格式(YYYY-MM-DD-HH-MM-DD)");
+    ui->gm_src->setAlignment(Qt::AlignCenter);
+    connect(ui->utc_src, SIGNAL(returnPressed()), this, SLOT(on_utc_to_gm_btn_clicked()));
+    connect(ui->gm_src, SIGNAL(returnPressed()), this, SLOT(on_gm_to_utc_btn_clicked()));
     return;
 }
 
@@ -171,5 +182,86 @@ void Dev_tool::on_omap_btn_clicked()
     ui->omap_ret->append("        <COL>" + ui->omap_col->currentText() + "</COL>");
     ui->omap_ret->append("    </OMAP_display>");
     ui->omap_ret->append("</Data>");
+    return;
+}
+
+void Dev_tool::on_utc_to_gm_btn_clicked()
+{
+    ui->utc_to_gm_msg->clear();
+    ui->gm_time_ret->clear();
+    ui->bj_time_ret->clear();
+    if (ui->utc_src->text().isEmpty())
+    {
+        ui->utc_to_gm_msg->setText("输入为空");
+        return;
+    }
+    bool ok = false;
+    time_t utc_time = ui->utc_src->text().toLongLong(&ok);
+    if (!ok || utc_time <= 0)
+    {
+        ui->utc_to_gm_msg->setText("输入有误，请检查");
+        return;
+    }
+    struct tm *time = gmtime(&utc_time);
+    char time_str[25] = {0};
+    strftime(time_str, 25, "%Y-%m-%d %H:%M:%S", time);
+    ui->gm_time_ret->setText(QString(time_str));
+    ui->gm_time_ret->setAlignment(Qt::AlignVCenter);
+    ui->gm_time_ret->setAlignment(Qt::AlignHCenter);
+
+    memset((void *)time_str, 0, sizeof(time_str));
+    utc_time += 8 * 3600;
+
+    time = gmtime(&utc_time);
+    strftime(time_str, 25, "%Y-%m-%d %H:%M:%S", time);
+    ui->bj_time_ret->setText(QString(time_str));
+    ui->bj_time_ret->setAlignment(Qt::AlignVCenter);
+    ui->bj_time_ret->setAlignment(Qt::AlignHCenter);
+    return;
+}
+
+
+void Dev_tool::on_gm_to_utc_btn_clicked()
+{
+    ui->gm_to_utc_msg->clear();
+    ui->utc_ret->clear();
+    if (ui->gm_src->text().isEmpty())
+    {
+        ui->gm_to_utc_msg->setText("输入为空");
+        return;
+    }
+    QString time_input = ui->gm_src->text();
+    auto time_msg_input = time_input.split("-");
+    if (time_msg_input.size() != 6)
+    {
+        ui->gm_to_utc_msg->setText("输入参数格式错误");
+        return;
+    }
+    int time_msg[6] = {0};
+    int i = 0;
+    for (const QString &msg : time_msg_input)
+    {
+        bool ok = false;
+        time_msg[i] = msg.toInt(&ok);
+        if (false == ok)
+        {
+            ui->gm_to_utc_msg->setText("输入参数中存在非数值");
+            return;
+        }
+        ++i;
+    }
+
+    struct tm time;
+    memset((void *)&time, 0, sizeof(struct tm));
+    time.tm_year = time_msg[0] - 1900;
+    time.tm_mon = time_msg[1] - 1;
+    time.tm_mday = time_msg[2];
+    time.tm_hour = time_msg[3];
+    time.tm_min = time_msg[4];
+    time.tm_sec = time_msg[5];
+    ui->utc_ret->setText(QString::number(mktime(&time)));
+    ui->utc_ret->setAlignment(Qt::AlignVCenter);
+    ui->utc_ret->setAlignment(Qt::AlignHCenter);
+    return;
 }
 

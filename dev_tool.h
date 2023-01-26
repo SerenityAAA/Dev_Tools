@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDir>
+#include <time.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Dev_tool; }
@@ -23,6 +24,10 @@ private slots:
     void on_calc_num_btn_clicked();
 
     void on_omap_btn_clicked();
+
+    void on_utc_to_gm_btn_clicked();
+
+    void on_gm_to_utc_btn_clicked();
 
 private:
     Ui::Dev_tool *ui; 
