@@ -96,6 +96,7 @@ void Dev_tool::on_calc_num_btn_clicked()
 
 void Dev_tool::tab1_init()
 {
+    //框内输入时可以回车进行计算，下类同
     connect(ui->num_input, SIGNAL(returnPressed()), this, SLOT(on_calc_num_btn_clicked()));
     ui->status_label_tab1->setText("初始化完成，请输入溢出数");
     return;
@@ -126,8 +127,9 @@ void Dev_tool::tab2_init()
 
 void Dev_tool::tab3_init()
 {
-    ui->gm_src->setPlaceholderText("输入格式(YYYY-MM-DD-HH-MM-DD)");
+    ui->gm_src->setPlaceholderText("输入格式(YYYY-MM-DD-HH-MM-SS)");
     ui->gm_src->setAlignment(Qt::AlignCenter);
+    ui->utc_src->setAlignment(Qt::AlignCenter);
     connect(ui->utc_src, SIGNAL(returnPressed()), this, SLOT(on_utc_to_gm_btn_clicked()));
     connect(ui->gm_src, SIGNAL(returnPressed()), this, SLOT(on_gm_to_utc_btn_clicked()));
     return;
@@ -250,6 +252,39 @@ void Dev_tool::on_gm_to_utc_btn_clicked()
         }
         ++i;
     }
+    do
+    {
+        if (time_msg[0] < 1970 || time_msg[0] > 2040)
+        {
+            ui->gm_to_utc_msg->setText("输入年份错误");
+            return;
+        }
+        if (time_msg[1] < 1 || time_msg[1] > 12)
+        {
+            ui->gm_to_utc_msg->setText("输入月份错误");
+            return;
+        }
+        if (time_msg[2] < 1 || time_msg[2] > 31)
+        {
+            ui->gm_to_utc_msg->setText("输入日错误");
+            return;
+        }
+        if (time_msg[3] < 0 || time_msg[3] > 23)
+        {
+            ui->gm_to_utc_msg->setText("输入小时错误");
+            return;
+        }
+        if (time_msg[4] < 0 || time_msg[4] > 59)
+        {
+            ui->gm_to_utc_msg->setText("输入分钟错误");
+            return;
+        }
+        if (time_msg[5] < 0 || time_msg[5] > 59)
+        {
+            ui->gm_to_utc_msg->setText("输入秒错误");
+            return;
+        }
+    }while(0);  // 1900-01-01 00:00:00 to 2038-12-31 23:59:59
 
     struct tm time;
     memset((void *)&time, 0, sizeof(struct tm));
