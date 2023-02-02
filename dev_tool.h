@@ -7,6 +7,7 @@
 #include <QTextStream>
 #include <QDir>
 #include <time.h>
+#include <QClipboard>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Dev_tool; }
@@ -28,6 +29,8 @@ private slots:
     void on_utc_to_gm_btn_clicked();
 
     void on_gm_to_utc_btn_clicked();
+
+    void on_copy_btn_clicked();
 
 private:
     Ui::Dev_tool *ui; 

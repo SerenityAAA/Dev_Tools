@@ -14,6 +14,9 @@ Dev_tool::Dev_tool(QWidget *parent)
     tab1_init();
     tab2_init();
     tab3_init();
+    //添加主页信息，格式为蓝色去除下划线超链接
+    ui->web_label->setText("<style> a {text-decoration: none} </style> <a style='color: blue;' href=\"https://github.com/SerenityAAA/Dev_Tools/\">https://github.com/SerenityAAA/Dev_Tools/");
+
 }
 
 Dev_tool::~Dev_tool()
@@ -139,6 +142,7 @@ void Dev_tool::tab3_init()
 void Dev_tool::on_omap_btn_clicked()
 {
     ui->omap_ret->clear();
+    ui->copy_btn->setEnabled(false);
     if (ui->omap_label->text().isEmpty())
     {
         ui->omap_ret->setText("标签名为空！");
@@ -184,6 +188,8 @@ void Dev_tool::on_omap_btn_clicked()
     ui->omap_ret->append("        <COL>" + ui->omap_col->currentText() + "</COL>");
     ui->omap_ret->append("    </OMAP_display>");
     ui->omap_ret->append("</Data>");
+    ui->copy_btn->setEnabled(true);
+
     return;
 }
 
@@ -199,7 +205,7 @@ void Dev_tool::on_utc_to_gm_btn_clicked()
     }
     bool ok = false;
     time_t utc_time = ui->utc_src->text().toLongLong(&ok);
-    if (!ok || utc_time <= 0)
+    if (!ok || utc_time < 0)    //utc_time = 0 == 1970-01-01 00:00:00 (gm_time)
     {
         ui->utc_to_gm_msg->setText("输入有误，请检查");
         return;
@@ -297,6 +303,17 @@ void Dev_tool::on_gm_to_utc_btn_clicked()
     ui->utc_ret->setText(QString::number(mktime(&time)));
     ui->utc_ret->setAlignment(Qt::AlignVCenter);
     ui->utc_ret->setAlignment(Qt::AlignHCenter);
+    return;
+}
+
+
+void Dev_tool::on_copy_btn_clicked()
+{
+    if (ui->omap_ret->document()->isEmpty())
+    {
+        return;
+    }
+    QApplication::clipboard()->setText(ui->omap_ret->toPlainText());
     return;
 }
 
